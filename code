@@ -1,0 +1,83 @@
+import numpy as np
+
+## Define $K_n$ and $K_m$ and Input the number of Rooks.
+
+n = 
+m = 
+rooks_num = 
+degree = n*m
+
+## Calculate $K_n\Box K_m$
+
+I_n = np.identity(n,dtype=int)
+K_n = np.ones((n,n), dtype=int) - I_n
+I_m = np.identity(m,dtype=int)
+K_m = np.ones((m,m), dtype=int) - I_m
+A = np.tensordot(K_n, I_m, axes=0)
+B = np.tensordot(I_n, K_m, axes=0)
+C = A+B
+D = np.hstack(C[0])
+for i in list(range(n-1)):
+  D = np.vstack((D, np.hstack(C[i+1])))
+print(D)
+print("The Cartesian product of complete graphs is {}".format(D.shape))
+
+## Find Combinations
+
+def combs(a):
+    if len(a) == 0:
+        return [[]]
+    cs = []
+    for c in combs(a[1:]):
+        cs += [c, c+[a[0]]]
+    return cs
+    
+S = combs(list(range(degree)))
+B = []
+K = ()
+for y in S:
+  if len(y) == rooks_num:
+    B.append(y)
+print(B)
+
+## Find the domiantion the rooks can do.
+
+P = []
+for h in B:
+  A_out = [[0] * degree]
+  for k in h:
+    A_i = D[k, np.r_[0:degree]]
+    A_out = np.add(A_out, A_i)
+  for k in h:
+    A_out = np.delete(A_out, k)
+  #print(A_out)
+  #print(np.min(A_out))
+  P.append(min(A_out))
+print("{} Rooks can do {} dominating.".format(rooks_num,max(P)))
+
+O = []
+for h in B:
+  B_out = [[0] * degree]
+  for k in h:
+    B_i = D[k, np.r_[0:degree]]
+    B_out = np.add(B_out, B_i)
+  for k in h:
+    B_out = np.delete(B_out, k)
+  if min(B_out) == max(P):
+    O.append(np.sort(h))
+for t in O:
+  a = [*range(0, degree, 1)]
+  for i in range(m):
+    for i in t:
+      a[i] = degree
+    for i in range(degree):
+      if a[i] == degree:
+        a[i] = 1
+      else:
+        a[i] = 0
+  #print(a)
+  r=[]
+  for i in range(n):
+    r.append(a[0+m*i:m+m*i])
+  v = np.array(r)
+  print(v)
